@@ -35,8 +35,8 @@ def readcontent(url,ext = "mp3", output = "./"):
         writeFile(cont) 
     writeFile("\n\r\n\r\n\r") 
     
-def Action(url):
-    print url
+def handleOnePage(url):
+    print 'handle :' + url + ' now...'
     request = urllib2.Request(url)
     response = urllib2.urlopen(request)
     content = response.read()
@@ -55,7 +55,7 @@ def Action(url):
             one.startswith("/html/article/chengchangjishi/2011")):
             continue
         lenth = lenth + 1
-    print "amount:" + str(lenth)
+    # print "amount:" + str(lenth)
     for i in range(0,size,1):
         one = strMatch[i]
         if not (one.startswith("/html/article/chengchangjishi/2016") or
@@ -67,11 +67,35 @@ def Action(url):
             continue
         UrlItem = "http://www.qnwz.cn" + one
         readcontent(UrlItem)
-        print "remain:"  + str(lenth - i - 1)
+        # print "remain:"  + str(lenth - i - 1)
 
+def obtainPages(url):
+    pages = []
+    #1.domain
+    index = url.rfind("/");
+    domain = url[0:index+1];
+    
+    request = urllib2.Request(url)
+    response = urllib2.urlopen(request)
+    #2.content
+    content = response.read()
+    #print content
+    #3.resource
+    #print content
+    # pattern = '<span class="pageinfo">共 <strong>(.*?)</strong>页<strong>(.*?)</strong>条</span>'
+    pattern = '<span class="pageinfo">(.*?)</span>'
+    pageinfo = re.findall(pattern, content, re.DOTALL)[0]
+    pageNum = re.findall('<strong>(.*?)</strong>', pageinfo, re.DOTALL)[0]
+    pageNumber = int(pageNum)
+    for i in range(1, pageNumber + 1, 1):
+        pageAddr = 'http://www.qnwz.cn/html/article/chengchangjishi/118-' + str(i) + '.html'
+        pages.append(pageAddr);
+        handleOnePage(pageAddr)
+        print "remain:"  + str(pageNumber - i) + ' pages...'
+    
 if __name__=='__main__':
     url = "http://www.qnwz.cn/html/article/chengchangjishi/";
-    Action(url);
+    obtainPages(url);
     # url = "http://www.qnwz.cn/html/article/chengchangjishi/201604/04-621447.html";
     
     
